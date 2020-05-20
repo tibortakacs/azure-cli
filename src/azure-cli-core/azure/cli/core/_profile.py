@@ -67,10 +67,10 @@ TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
                                           'isUserIdDisplayable',
                                           'tenantId']
 
-_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
+_CLIENT_ID = '0b1c8f7e-28d2-4378-97e2-7d7d63f7c87f'
 _COMMON_TENANT = 'common'
 
-_TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
+_TENANT_LEVEL_ACCOUNT_NAME = 'Azure Sphere'
 
 _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
@@ -162,7 +162,8 @@ class Profile(object):
             self._creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
 
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
-        self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
+        # self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
+        self._ad_resource_uri = "https://ostechnology.onmicrosoft.com/azsphereapi"
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
         self._msi_creds = None
 
@@ -538,6 +539,8 @@ class Profile(object):
         return None, None
 
     def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
+        resource = "https://ostechnology.onmicrosoft.com/azsphereapi"
+
         if aux_tenants and aux_subscriptions:
             raise CLIError("Please specify only one of aux_subscriptions and aux_tenants, not both")
 
@@ -839,7 +842,7 @@ class SubscriptionFinder(object):
         token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
                                                                     resource, _CLIENT_ID, None)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
-        logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
+        # logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
         if tenant is None:
             result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
         else:
@@ -959,12 +962,12 @@ class SubscriptionFinder(object):
         client = self._arm_client_factory(token_credential)
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
-        for s in subscriptions:
-            # map tenantId from REST API to homeTenantId
-            if hasattr(s, "tenant_id"):
-                setattr(s, 'home_tenant_id', s.tenant_id)
-            setattr(s, 'tenant_id', tenant)
-            all_subscriptions.append(s)
+        # for s in subscriptions:
+        #     # map tenantId from REST API to homeTenantId
+        #     if hasattr(s, "tenant_id"):
+        #         setattr(s, 'home_tenant_id', s.tenant_id)
+        #     setattr(s, 'tenant_id', tenant)
+        #     all_subscriptions.append(s)
         self.tenants.append(tenant)
         return all_subscriptions
 
